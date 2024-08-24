@@ -1,16 +1,18 @@
 import { getWrappedProtocolToken, Token } from "@/constants/tokens";
 import {
   BuiltTransaction,
+  Chains,
   DCAPermission,
   DCASwapInterval,
   IDCAService,
+  PositionSummary,
 } from "@balmy/sdk";
 import { parseUnits } from "viem/utils";
 import { ContractProvider } from "./contract.provider";
 import { SmartAccountClient } from "permissionless";
 import { EntryPoint } from "permissionless/types";
 import { SmartAccount } from "permissionless/accounts";
-import { Address, Chain, Transport } from "viem";
+import { Address, Chain,  Transport } from "viem";
 
 export interface IBuildPositionParams {
   chainId: number;
@@ -64,7 +66,7 @@ export class PositionProvider {
       swapsAmount,
       amount,
     });
-    console.log(params)
+    console.log(params);
 
     return await this.dcaService.buildCreatePositionTx(params);
   }
@@ -115,20 +117,111 @@ export class PositionProvider {
       amountOfSwaps: Number(amountOfSwaps),
       owner: account.toLowerCase(),
       deposit,
+      totalAmount,
     };
   }
 
   async depositSafe(params: IBuildPositionParams) {
+    const { totalAmount } = this.buildCreatePositionParams(params);
+    const approveTx = this.contractProvider.buildApproveToken(
+      totalAmount,
+      params.from.address,
+      params.to.address,
+    );
     console.log("deposit on balmy");
     const depositTx = await this.buildCreatePositionTx(params);
     console.log("result");
     console.log(depositTx);
 
     console.log("deposit safe");
+    return await this.sendTransactionsToSafe([approveTx, depositTx]);
+  }
+
+  async getWalletPositions(wallet: string) {
+    console.log("Getting positions for wallet: ", wallet);
+    const positions = await this.dcaService.getPositionsByAccount({
+      accounts: [wallet],
+      chains: [Chains.POLYGON.chainId],
+    });
+    console.log("positions: ", positions);
+
+    return positions;
+  }
+
+  async terminate(position: PositionSummary) {
+    console.log("Terminate position: ", position);
+    const hubAddress = this.contractProvider.getHUBCompanionAdress(
+      position.chainId,
+    );
+    const tx = await this.dcaService.buildTerminatePositionTx({
+      chainId: position.chainId,
+      positionId: position.id,
+      dcaHub: hubAddress,
+      recipient: position.owner,
+      withdraw: {
+        unswappedConvertTo: position.from.address,
+        swappedConvertTo: position.to.address,
+      },
+    });
+    console.log("tx: ", tx);
+
+    console.log("sending to safe");
+    const result = await this.sendTransactionToSafe(
+      position.owner as Address,
+      tx.value,
+      tx.data as Address,
+    );
+    console.log("safe result terminate: ", result);
+
+    return result;
+  }
+
+  async withdraw(position: PositionSummary) {
+    console.log("Withdraw position: ", position);
+    const hubAddress = this.contractProvider.getHUBCompanionAdress(
+      position.chainId,
+    );
+    const tx = await this.dcaService.buildWithdrawPositionTx({
+      chainId: position.chainId,
+      positionId: position.id,
+      withdraw: {
+        convertTo: position.to.address,
+      },
+      dcaHub: hubAddress,
+      recipient: position.owner,
+    });
+
+    console.log("tx: ", tx);
+
+    const result = await this.sendTransactionToSafe(
+      position.owner as Address,
+      tx.value,
+      tx.data as Address,
+    );
+    console.log("safe result withdraw: ", result);
+
+    return result;
+  }
+
+  private async sendTransactionsToSafe(txs: BuiltTransaction[]) {
+    const txsMapped = txs.map((tx) => ({
+      to: tx.to as Address,
+      value: tx.value!,
+      data: tx.data as Address,
+    }));
+
+    return await this.safeClient.sendTransactions({ transactions: txsMapped });
+  }
+
+  private async sendTransactionToSafe(
+    to: Address,
+    value: bigint | undefined,
+    data: Address,
+  ) {
     return await this.safeClient.sendTransaction({
-      to: params.account as Address,
-      value: depositTx.value,
-      data: depositTx.data as Address,
+      to,
+      value,
+      data,
     });
   }
 }

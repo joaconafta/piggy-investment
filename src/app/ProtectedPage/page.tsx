@@ -6,12 +6,17 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useSmartAccount } from "../hooks/SmartAccountContext";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { BalmyProvider } from "@/providers/balmy.provider";
 import { getChainId } from "@/functions/chain/get.id";
-import { USDC, WBTC } from "@/constants/tokens";
-import { Chains, DCASwapInterval } from "@balmy/sdk";
+import { DCASwapInterval } from "@balmy/sdk";
 import { polygon } from "viem/chains";
 import { USDC_ADDRESSES } from "@/constants/addresses";
+import { usdcToWBTC } from "@/functions/dca/deposit_usdc";
+import { getPositions } from "@/functions/dca/get_positions";
+import { BalmyProvider } from "@/providers/balmy.provider";
+import { terminatePosition } from "@/functions/dca/terminate_position";
+import { withdrawPosition } from "@/functions/dca/withdraw_position";
+import { Contract } from "ethers";
+import { getUsdcBalance } from "@/functions/usdc/balance";
 
 const ProtectedPage = () => {
   const { logout } = usePrivy();
@@ -19,67 +24,43 @@ const ProtectedPage = () => {
   const [balance, setBalance] = useState<any>();
   const chainId = getChainId();
 
+  const usdcAbi = [
+    "function balanceOf(address owner) view returns (uint256)",
+    "function approve(address spender, uint256 amount) public returns (bool)",
+  ];
+  const provider = new ethers.JsonRpcProvider(polygon.rpcUrls.default.http[0]);
+  const usdcContract = new ethers.Contract(
+        USDC_ADDRESSES[chainId],
+        usdcAbi,
+        provider,
+      );
   useEffect(() => {
     if (!smartAccountAddress) return;
-    const usdcAbi = [
-      "function balanceOf(address owner) view returns (uint256)",
-    ];
 
-    async function doTransaction(
-      account: string,
-      chainId: number,
-      swapInterval: DCASwapInterval,
-      swapsAmount: string,
-      totalAmount: string,
-    ) {
-      const balmy = new BalmyProvider(smartAccountClient);
-      const doTransaction = await balmy.positionProvider.depositSafe({
-        account,
-        chainId,
-        from: USDC(chainId),
-        to: WBTC(chainId),
-        swapInterval,
-        swapsAmount,
-        amount: totalAmount,
-      });
-      console.log(doTransaction);
+    if (usdcContract) {
+      getUsdcBalance(usdcContract, smartAccountAddress, setBalance);
     }
 
-    async function getUSDCBalance(
-      provider: ethers.ContractRunner | null | undefined,
-      usdcContractAddress: string | ethers.Addressable,
-    ) {
-      try {
-        // Crear instancia del contrato de USDC
-        const usdcContract = new ethers.Contract(
-          usdcContractAddress,
-          usdcAbi,
-          provider,
+    console.log("smartAccountClient ", smartAccountClient);
+    console.log("contract ", usdcContract);
+    if (smartAccountClient && usdcContract) {
+      (async () => {
+        const balmy = new BalmyProvider(smartAccountClient, usdcContract);
+        await usdcToWBTC(
+          balmy,
+          chainId,
+          smartAccountAddress,
+          DCASwapInterval.ONE_MINUTE,
+          "1",
+          "1",
         );
-        // Obtener el balance de USDC del Safe smart account
-        const usdcBalance = await usdcContract.balanceOf(
-          smartAccountAddress as `0x${string}`,
-        );
-        return usdcBalance;
-      } catch (error) {
-        console.error("Error al obtener el balance de USDC", error);
-      }
-    }
-    const provider = new ethers.JsonRpcProvider(
-      polygon.rpcUrls.default.http[0],
-    );
-    getUSDCBalance(provider, USDC_ADDRESSES[chainId]).then((balance) =>
-      console.log("balance", balance),
-    );
-
-    if (smartAccountClient) {
-      doTransaction(
-        smartAccountAddress,
-        chainId,
-        DCASwapInterval.ONE_MINUTE,
-        "1",
-        "1",
-      );
+        const positions = await getPositions(balmy, smartAccountAddress);
+        for (const position of positions[polygon.id]) {
+          console.log(position);
+          // const withdraw = await withdrawPosition(balmy, position);
+          // const terminate = await terminatePosition(balmy, position);
+        }
+      })();
     }
   }, [smartAccountAddress, smartAccountClient]);
 

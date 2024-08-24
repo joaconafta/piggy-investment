@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { createPublicClient, createWalletClient, custom, http } from "viem";
-import {  polygon } from "viem/chains";
+import { polygon } from "viem/chains";
 import { Chain, Transport } from "viem";
 import {
   signerToSafeSmartAccount,
@@ -128,12 +128,12 @@ export const SmartAccountProvider = ({
 
       const pimlicoPaymaster = createPimlicoPaymasterClient({
         chain: polygon,
-        transport: http(process.env.NEXT_PUBLIC_PIMLICO_PAYMASTER_URL),
+        transport: http(transportUrl(polygon)),
         entryPoint: ENTRYPOINT_ADDRESS_V07,
       });
 
       const pimlicoBundler = createPimlicoBundlerClient({
-        transport: http(process.env.NEXT_PUBLIC_PIMLICO_PAYMASTER_URL),
+        transport: http(transportUrl(polygon)),
         entryPoint: ENTRYPOINT_ADDRESS_V07,
       });
 
