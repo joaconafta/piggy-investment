@@ -1,5 +1,4 @@
 'use client'
-import AuthProvider from "@/components/AuthProvider";
 import Login from "@/components/Login";
 
 export default function Home() {
