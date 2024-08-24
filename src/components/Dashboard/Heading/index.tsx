@@ -27,7 +27,6 @@ const HeadingDashboard : React.FC<IHeadingDashboard> = ({setChild, child, setTab
 
     const handleClick = (child: string) => {
         setChild(child)
-        child === 'See All' ? setTab("Home") : setTab('Savings')
     }
 
 

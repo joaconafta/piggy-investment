@@ -1,3 +1,4 @@
+import { IInvestment } from '@/app/Dashboard/page'
 import FredokaTitle from '@/components/Atoms/FredokaTitle'
 import Image, { StaticImageData } from 'next/image'
 import React from 'react'
@@ -45,7 +46,7 @@ const SavingsCard: React.FC<ISaving> = ({ title, amount, imageChild, imageSaving
 }
 
 interface ISavingAccounts {
-    savings: ISaving[]
+    savings: ISaving[] | IInvestment[]
 }
 
 const SavingAccounts: React.FC<ISavingAccounts> = ({ savings }) => {

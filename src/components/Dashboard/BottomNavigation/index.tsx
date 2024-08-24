@@ -18,10 +18,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ tabs, setTab, tab, 
 
     const handleClick = (tabName: string) => {
        setTab(tabName)
-       tabName === "Home" ? setChild('See All') : setChild('Matt')
     }
-
-
 
     return (
         <div className='grid grid-cols-4 fixed bottom-0 right-0 left-0 justify-items-center'>

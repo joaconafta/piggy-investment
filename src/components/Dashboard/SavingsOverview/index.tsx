@@ -9,7 +9,9 @@ interface ISavingsOverview {
     title: string
     childSavings? : IChildSavings[]
     isHome?: boolean
+    isSaving?: boolean
     setOpenModal? : React.Dispatch<React.SetStateAction<boolean>>
+    isInvestment?: boolean
 
 }
 
@@ -18,7 +20,6 @@ interface IChildSavings {
     amount: number
     image: StaticImageData
 }
-
 
 
 const ChildSavings: React.FC<IChildSavings> = ({ name, amount, image }) => {
@@ -43,7 +44,7 @@ const ChildSavings: React.FC<IChildSavings> = ({ name, amount, image }) => {
     )
 }
 
-const SavingsOverview: React.FC<ISavingsOverview> = ({ amount, title, childSavings, isHome, setOpenModal }) => {
+const SavingsOverview: React.FC<ISavingsOverview> = ({ amount, title, childSavings, isHome, isSaving, isInvestment, setOpenModal }) => {
 
     const setOpenModalNewSavingAccount = () => {
         if(setOpenModal) {
@@ -63,8 +64,9 @@ const SavingsOverview: React.FC<ISavingsOverview> = ({ amount, title, childSavin
                     ))}
                 </div>
             </div>}
+
             {
-                !isHome && <div className='flex justify-center'>
+                isSaving && <div className='flex justify-center'>
                     <Button onClick={setOpenModalNewSavingAccount}>Add new saving account</Button>
                 </div>
             }
