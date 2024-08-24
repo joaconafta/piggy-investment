@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect } from 'react'
-import Button from '../Button'
+import Button from '@/components/Button'
 import Image from 'next/image'
 import { ConnectedWallet, usePrivy, useWallets } from '@privy-io/react-auth'
 import piggy from '../../../public/piggy.svg'

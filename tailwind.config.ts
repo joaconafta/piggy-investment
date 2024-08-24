@@ -18,6 +18,9 @@ const config: Config = {
         brand : "#8B5CF6",
         disabledGray: "#D9D9D9",
         disabledGrayText: "#B3B3B3",
+        neutral: {
+          200 : "#E2E8F0",
+        }
       },
     },
   },
