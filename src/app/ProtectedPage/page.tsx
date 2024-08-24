@@ -6,9 +6,8 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useSmartAccount } from "../hooks/SmartAccountContext";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { getChainId } from "@/functions/chain/get.id";
 import { DCASwapInterval } from "@balmy/sdk";
-import { polygon } from "viem/chains";
+import { polygon, polygonAmoy } from "viem/chains";
 import { USDC_ADDRESSES } from "@/constants/addresses";
 import { usdcToWBTC } from "@/functions/dca/deposit_usdc";
 import { getPositions } from "@/functions/dca/get_positions";
@@ -20,20 +19,21 @@ import { getUsdcBalance } from "@/functions/usdc/balance";
 
 const ProtectedPage = () => {
   const { logout } = usePrivy();
-  const { smartAccountAddress, eoa, smartAccountClient } = useSmartAccount();
+  const { smartAccountAddress, eoa, smartAccountClient, publicClient } =
+    useSmartAccount();
   const [balance, setBalance] = useState<any>();
-  const chainId = getChainId();
+  const chain = polygon;
 
   const usdcAbi = [
     "function balanceOf(address owner) view returns (uint256)",
     "function approve(address spender, uint256 amount) public returns (bool)",
   ];
-  const provider = new ethers.JsonRpcProvider(polygon.rpcUrls.default.http[0]);
+  const provider = new ethers.JsonRpcProvider(chain.rpcUrls.default.http[0]);
   const usdcContract = new ethers.Contract(
-        USDC_ADDRESSES[chainId],
-        usdcAbi,
-        provider,
-      );
+    USDC_ADDRESSES[chain.id],
+    usdcAbi,
+    provider,
+  );
   useEffect(() => {
     if (!smartAccountAddress) return;
 
@@ -41,21 +41,27 @@ const ProtectedPage = () => {
       getUsdcBalance(usdcContract, smartAccountAddress, setBalance);
     }
 
-    console.log("smartAccountClient ", smartAccountClient);
-    console.log("contract ", usdcContract);
     if (smartAccountClient && usdcContract) {
       (async () => {
-        const balmy = new BalmyProvider(smartAccountClient, usdcContract);
+        const balmy = new BalmyProvider(
+          smartAccountClient,
+          usdcContract,
+          publicClient,
+        );
         await usdcToWBTC(
           balmy,
-          chainId,
+          chain.id,
           smartAccountAddress,
           DCASwapInterval.ONE_MINUTE,
           "1",
           "1",
         );
-        const positions = await getPositions(balmy, smartAccountAddress);
-        for (const position of positions[polygon.id]) {
+        const positions = await getPositions(
+          balmy,
+          smartAccountAddress,
+          chain.id,
+        );
+        for (const position of positions[chain.id]) {
           console.log(position);
           // const withdraw = await withdrawPosition(balmy, position);
           // const terminate = await terminatePosition(balmy, position);

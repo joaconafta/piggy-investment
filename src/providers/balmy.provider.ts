@@ -10,9 +10,9 @@ export class BalmyProvider {
 
   public readonly contractProvider: ContractProvider;
 
-  constructor(safe: SafeClient, usdcContract: Contract) {
+  constructor(safe: SafeClient, usdcContract: Contract, publicClient: any) {
     this.sdk = buildSDK();
-    this.contractProvider = new ContractProvider(usdcContract);
+    this.contractProvider = new ContractProvider(usdcContract, publicClient, safe);
     this.positionProvider = new PositionProvider(
       this.sdk.dcaService,
       this.contractProvider,

@@ -1,5 +1,6 @@
-import { Address, Chains } from "@balmy/sdk";
-import { USDC_ADDRESSES, WMATIC_ADDRESSES } from "./addresses";
+import { Address } from "@balmy/sdk";
+import { USDC_ADDRESSES, WBTC_ADDRESSES, WMATIC_ADDRESSES } from "./addresses";
+import { polygon, polygonAmoy } from "viem/chains";
 
 export enum TokenType {
   BASE = "BASE",
@@ -29,8 +30,7 @@ export type Token = {
 export const WMATIC = (chainId: number): Token => ({
   chainId,
   decimals: 18,
-  address:
-    WMATIC_ADDRESSES[chainId] || WMATIC_ADDRESSES[Chains.POLYGON.chainId],
+  address: WMATIC_ADDRESSES[chainId] || WMATIC_ADDRESSES[polygon.id],
   name: "Wrapped Matic",
   symbol: "WMATIC",
   type: TokenType.BASE,
@@ -43,7 +43,7 @@ export const WMATIC = (chainId: number): Token => ({
 export const USDC = (chainId: number): Token => ({
   chainId,
   decimals: 6,
-  address: USDC_ADDRESSES[chainId] || USDC_ADDRESSES[Chains.POLYGON.chainId],
+  address: USDC_ADDRESSES[chainId] || USDC_ADDRESSES[polygon.id],
   name: "USDC",
   symbol: "USDC",
   type: TokenType.BASE,
@@ -56,7 +56,7 @@ export const USDC = (chainId: number): Token => ({
 export const WBTC = (chainId: number): Token => ({
   chainId,
   decimals: 8,
-  address: "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+  address: WBTC_ADDRESSES[chainId] || WBTC_ADDRESSES[polygon.id],
   name: "Wrapped BTC",
   symbol: "WBTC",
   type: TokenType.BASE,
@@ -70,7 +70,8 @@ export const WRAPPED_PROTOCOL_TOKEN: Record<
   number,
   (chainId: number) => Token
 > = {
-  [Chains.POLYGON.chainId]: WMATIC,
+  [polygon.id]: WMATIC,
+  [polygonAmoy.id]: WMATIC,
 };
 
 export const getWrappedProtocolToken = (chainId: number) => {

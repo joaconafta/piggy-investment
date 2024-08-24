@@ -66,7 +66,6 @@ export class PositionProvider {
       swapsAmount,
       amount,
     });
-    console.log(params);
 
     return await this.dcaService.buildCreatePositionTx(params);
   }
@@ -139,11 +138,11 @@ export class PositionProvider {
     return await this.sendTransactionsToSafe([approveTx, depositTx]);
   }
 
-  async getWalletPositions(wallet: string) {
+  async getWalletPositions(wallet: string, chainId: number) {
     console.log("Getting positions for wallet: ", wallet);
     const positions = await this.dcaService.getPositionsByAccount({
       accounts: [wallet],
-      chains: [Chains.POLYGON.chainId],
+      chains: [chainId],
     });
     console.log("positions: ", positions);
 

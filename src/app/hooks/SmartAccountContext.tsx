@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { createPublicClient, createWalletClient, custom, http } from "viem";
-import { polygon } from "viem/chains";
+import { polygon, polygonAmoy } from "viem/chains";
 import { Chain, Transport } from "viem";
 import {
   signerToSafeSmartAccount,
@@ -52,6 +52,7 @@ interface SmartAccountInterface {
   smartAccountAddress: `0x${string}` | undefined;
   /** Boolean to indicate whether the smart account state has initialized */
   smartAccountReady: boolean;
+  publicClient: any;
 }
 const transportUrl = (chain: Chain) =>
   `https://api.pimlico.io/v2/${chain.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`;
@@ -61,6 +62,7 @@ const SmartAccountContext = React.createContext<SmartAccountInterface>({
   smartAccountClient: undefined,
   smartAccountAddress: undefined,
   smartAccountReady: false,
+  publicClient: undefined,
 });
 
 export const useSmartAccount = () => {
@@ -96,6 +98,8 @@ export const SmartAccountProvider = ({
   >();
   const [smartAccountReady, setSmartAccountReady] = useState(false);
 
+  const [publicClient, setPublicClient] = useState();
+
   useEffect(() => {
     if (!ready) return;
   }, [ready, wallets]);
@@ -104,19 +108,20 @@ export const SmartAccountProvider = ({
     // Creates a smart account given a Privy `ConnectedWallet` object representing
     // the  user's EOA.
     const createSmartWallet = async (eoa: ConnectedWallet) => {
+      const chain = polygon;
       setEoa(eoa);
       // Get an EIP1193 provider and viem WalletClient for the EOA
       const eip1193provider = await eoa.getEthereumProvider();
       const privyClient = createWalletClient({
         account: eoa.address as `0x${string}`,
-        chain: polygon,
+        chain,
         transport: custom(eip1193provider),
       });
 
       const customSigner = walletClientToSmartAccountSigner(privyClient);
 
       const publicClient = createPublicClient({
-        chain: polygon, // Replace this with the chain of your app
+        chain, // Replace this with the chain of your app
         transport: http(),
       });
 
@@ -127,21 +132,21 @@ export const SmartAccountProvider = ({
       });
 
       const pimlicoPaymaster = createPimlicoPaymasterClient({
-        chain: polygon,
-        transport: http(transportUrl(polygon)),
+        chain,
+        transport: http(transportUrl(chain)),
         entryPoint: ENTRYPOINT_ADDRESS_V07,
       });
 
       const pimlicoBundler = createPimlicoBundlerClient({
-        transport: http(transportUrl(polygon)),
+        transport: http(transportUrl(chain)),
         entryPoint: ENTRYPOINT_ADDRESS_V07,
       });
 
       const smartAccountClient = createSmartAccountClient({
         account: safeAccount,
         entryPoint: ENTRYPOINT_ADDRESS_V07,
-        chain: polygon, // Replace this with the chain for your app
-        bundlerTransport: http(transportUrl(polygon)),
+        chain, // Replace this with the chain for your app
+        bundlerTransport: http(transportUrl(chain)),
         middleware: {
           sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation,
           gasPrice: async () =>
@@ -168,6 +173,7 @@ export const SmartAccountProvider = ({
         smartAccountReady: smartAccountReady,
         smartAccountClient: smartAccountClient,
         smartAccountAddress: smartAccountAddress,
+        publicClient: publicClient,
         eoa: eoa,
       }}
     >
