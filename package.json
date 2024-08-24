@@ -9,9 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+   "@privy-io/react-auth": "^1.80.0",
+    "@radix-ui/react-select": "^2.1.1",
+    "ethers": "^6.13.2",
+    "lucide-react": "^0.435.0",
+    "next": "14.2.6",
+    "permissionless": "^0.1.45",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.6"
+    "viem": "^2.17.11"
   },
   "devDependencies": {
     "typescript": "^5",
