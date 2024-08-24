@@ -12,7 +12,7 @@ import { ContractProvider } from "./contract.provider";
 import { SmartAccountClient } from "permissionless";
 import { EntryPoint } from "permissionless/types";
 import { SmartAccount } from "permissionless/accounts";
-import { Address, Chain,  Transport } from "viem";
+import { Address, Chain, Transport } from "viem";
 
 export interface IBuildPositionParams {
   chainId: number;
@@ -123,11 +123,13 @@ export class PositionProvider {
 
   async depositSafe(params: IBuildPositionParams) {
     const { totalAmount } = this.buildCreatePositionParams(params);
+    console.log("sending approve token");
     const approveTx = this.contractProvider.buildApproveToken(
       totalAmount,
       params.from.address,
       params.to.address,
     );
+    console.log(approveTx);
     console.log("deposit on balmy");
     const depositTx = await this.buildCreatePositionTx(params);
     console.log("result");
