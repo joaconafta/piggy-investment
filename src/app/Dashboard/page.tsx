@@ -5,7 +5,7 @@ import matt from '../../../public/matt.svg'
 import lucy from '../../../public/lucy.svg'
 import moneyBag from '../../../public/moneyBag.svg'
 import graduated from '../../../public/graduated.svg'
-import SavingAccounts, { ISaving } from "@/components/Dashboard/SavingAccounts"
+import  { ISaving } from "@/components/Dashboard/SavingAccounts"
 import { StaticImageData } from "next/image"
 import BottomNavigation from "@/components/Dashboard/BottomNavigation"
 import home from '../../../public/home.svg';
@@ -30,6 +30,8 @@ import ModalAddInvestment from "@/components/Dashboard/ModalAddInvestment"
 import ModalAddInvestmentChooseType from "@/components/Dashboard/ModalAddInvestmentChooseType"
 import ModalAddInvestmentChildCrypto from "@/components/Dashboard/ModalAddInvestmentChildCrypto"
 import ModalAddInvestmentConfirm from "@/components/Dashboard/ModalAddInvestmentConfirm"
+import AuthenticationChecker from "@/components/AuthenticationChecker"
+import { usePrivy } from "@privy-io/react-auth"
 
 
 export interface ITab {
@@ -169,6 +171,7 @@ const Dashboard = () => {
     const [openInvestmentConfirm, setOpenInvestmentConfirm] = useState(false);
 
     return (
+        <AuthenticationChecker>
         <div>
             <ModalAddWallet
                 setOpenModalAddWallet={setOpenModalAddWallet}
@@ -248,6 +251,7 @@ const Dashboard = () => {
                 />
             </div>
         </div>
+        </AuthenticationChecker>
     )
 }
 

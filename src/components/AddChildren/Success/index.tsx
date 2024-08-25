@@ -14,7 +14,7 @@ const Success : React.FC<ISuccess> = () => {
     const router = useRouter()
 
     const onClickFinish = () => {
-        //router.push('/dashboard')
+        router.push('/Dashboard')
     }
 
     return (

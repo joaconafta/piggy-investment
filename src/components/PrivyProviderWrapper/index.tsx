@@ -14,8 +14,7 @@ export default function PrivyProviderWrapper({
             loginMethods: ['email', 'wallet'],
             appearance: {
                 theme: 'light',
-                accentColor: '#676FFF',
-                logo: '../../public/piggy.png'
+                accentColor: '#676FFF'
             },
             embeddedWallets: {
                 createOnLogin: 'all-users',

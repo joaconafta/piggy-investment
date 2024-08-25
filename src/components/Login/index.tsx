@@ -1,16 +1,19 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from '@/components/Button'
 import Image from 'next/image'
 import { ConnectedWallet, usePrivy, useWallets } from '@privy-io/react-auth'
 import piggy from '../../../public/piggy.svg'
 import FredokaTitle from '../Atoms/FredokaTitle'
+import { useRouter } from 'next/navigation'
 
 
 const Login = () => {
-    const { login, authenticated } = usePrivy();
+    const { login, authenticated, ready} = usePrivy();
+    const router = useRouter();
     const { wallets } = useWallets();
+    const [signUp , setSignUp] = useState(false);
 
     const onClickHandlerSignUp = () => {
         login();
@@ -19,6 +22,12 @@ const Login = () => {
     const onClickHandlerLogin = () => {
         login();
     }
+
+    useEffect (() => {
+        if(authenticated && ready){
+            router.push('/AddChildren')
+        }
+    }, [authenticated, ready])
 
   return (
     <main className="h-screen flex flex-col">

@@ -16,7 +16,6 @@ export interface IChild {
 
 const AddChildrenPage = () => {
     const [step, setStep] = useState(1)
-    const [previousStep, setPreviousStep] = useState(0)
     const [amountOfChildren, setAmountOfChildren] = useState(0)
     const [children, setChildren] = useState<IChild[]>([])
 
@@ -28,6 +27,7 @@ const AddChildrenPage = () => {
 
     console.log(amountOfChildren)
 
+  
 
     return (
         <div>
@@ -54,7 +54,6 @@ const AddChildrenPage = () => {
                     step={step}
                 >{children}</Step3>}
             {step === (amountOfChildren + 3) && <Success/>}
-            
         </div>
     )
 }
