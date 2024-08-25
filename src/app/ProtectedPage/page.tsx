@@ -27,7 +27,7 @@ const ProtectedPage = () => {
     "function balanceOf(address owner) view returns (uint256)",
     "function approve(address spender, uint256 amount) public returns (bool)",
   ];
-  const provider = new ethers.JsonRpcProvider(chain.rpcUrls.default.http[0]);
+  const provider = new ethers.JsonRpcProvider('https://polygon-mainnet.g.alchemy.com/v2/Fgy1wydMzkEVzqzkufxIT4IIoL15sKQU');
   const usdcContract = new ethers.Contract(
     USDC_ADDRESSES[chain.id],
     usdcAbi,

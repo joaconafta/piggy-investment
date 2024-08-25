@@ -1,7 +1,6 @@
 'use client';
 
 import { PrivyProvider } from "@privy-io/react-auth";
-import { baseSepolia } from "viem/chains";
 
 export default function PrivyProviderWrapper({
   children,
@@ -16,7 +15,7 @@ export default function PrivyProviderWrapper({
             appearance: {
                 theme: 'light',
                 accentColor: '#676FFF',
-                logo: '../../../public/piggy.png'
+                logo: '../../public/piggy.png'
             },
             embeddedWallets: {
                 createOnLogin: 'all-users',
