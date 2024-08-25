@@ -227,7 +227,9 @@ const Dashboard = () => {
                 child={child}
             />
             <div className="p-4">
-                {tab === "Home" && <Home />}
+                {tab === "Home" && <Home 
+                    balance={1000}
+                />}
                 {tab === "Savings" && <Savings
                     upperNavigation={child}
                     setOpenModalAddWallet={setOpenModalAddWallet}
