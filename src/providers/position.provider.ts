@@ -141,7 +141,7 @@ export class PositionProvider {
   async getWalletPositions(wallet: string, chainId: number) {
     console.log("Getting positions for wallet: ", wallet);
     const positions = await this.dcaService.getPositionsByAccount({
-      accounts: [wallet],
+      accounts: [wallet.toLowerCase()],
       chains: [chainId],
     });
     console.log("positions: ", positions);

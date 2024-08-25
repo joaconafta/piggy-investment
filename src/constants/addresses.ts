@@ -1,4 +1,4 @@
-import { Address } from "@balmy/sdk";
+import { Address } from "viem";
 import { polygon, polygonAmoy } from "viem/chains";
 
 export const HUB_ADDRESSES: Record<number, Address> = {

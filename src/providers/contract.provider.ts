@@ -1,16 +1,13 @@
 import { HUB_ADDRESSES } from "@/constants/addresses";
 import ERC20ABI from "@/constants/ecr20abi";
-import { Contract } from "ethers";
 import { Address, encodeFunctionData, getContract } from "viem";
 
 export class ContractProvider {
-  private readonly usdcContract: Contract;
-  private readonly publicClient: any
-  private readonly walletClient: any
-  constructor(usdcContract: Contract, publicClient:any, walletClient:any) {
-    this.usdcContract = usdcContract;
-    this.publicClient = publicClient
-    this.walletClient = walletClient
+  private readonly publicClient: any;
+  private readonly walletClient: any;
+  constructor(publicClient: any, walletClient: any) {
+    this.publicClient = publicClient;
+    this.walletClient = walletClient;
   }
   public getHUBCompanionAdress(chainId: number): string {
     return HUB_ADDRESSES[chainId].toLowerCase();
