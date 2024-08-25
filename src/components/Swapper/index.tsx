@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Select,
     SelectContent,
@@ -11,6 +11,11 @@ import { ethers } from 'ethers';
 import usdcAbi from '@/abis/USDC'
 import tokenMessengerAbi from '@/abis/cctp/TokenMessenger';
 import messageTransmitterAbi from '@/abis/cctp/MessageTransmitter';
+import { useWallets } from '@privy-io/react-auth';
+import { useSmartAccount } from '@/app/hooks/SmartAccountContext';
+import { USDC_ADDRESSES } from '@/constants/addresses';
+import { arbitrumSepolia, polygon } from 'viem/chains';
+import { getUsdcBalance } from '@/functions/usdc/balance';
 
 
 interface ISwapper {
@@ -25,22 +30,84 @@ interface ISwapper {
     setOpen : React.Dispatch<React.SetStateAction<boolean>>;
 } 
 
+const chainsFrom = {
+  ETH_SEPOLIA: {
+    token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+    usdc: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238'
+  },
+  OP_SEPOLIA: {
+    token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+    usdc: '0x5fd84259d66Cd46123540766Be93DFE6D43130D7'
+  },
+  ARB_SEPOLIA: {
+    token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+    usdc: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d'
+  },
+  POLYGON_AMOY: {
+    token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+    usdc: '0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582'
+  },
+  BASE_SEPOLIA: {
+    token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+    usdc: '0x036CbD53842c5426634e7929541eC2318f3dCF7e'
+  },
+  AVAX_FUJI: {
+    token_messenger: '0xeb08f243e5d3fcff26a9e38ae5520a669f4019d0',
+    usdc: '0x5425890298aed601595a70ab815c96711a31bc65'
+  }
+}
+
+const chainsTo = {
+  ETH_SEPOLIA: {
+    message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
+    domain: 0
+  },
+  OP_SEPOLIA: {
+    message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
+    domain: 2
+  },
+  ARB_SEPOLIA: {
+    message_transmitter: '0xaCF1ceeF35caAc005e15888dDb8A3515C41B4872',
+    domain: 3
+  },
+  POLYGON_AMOY: {
+    message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
+    domain: 7
+  },
+  BASE_SEPOLIA: {
+    message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
+    domain: 6
+  },
+  AVAX_FUJI: {
+    message_transmitter: '0xa9fb1b3009dcb79e2fe346c16a604b8fa8ae0a79',
+    domain: 1
+  }
+}
+
 const Swapper: React.FC<ISwapper> = ({setValues, setOpen, values}) => {
     const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
     const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
     const [account, setAccount] = useState<string | null>(null);
-    const selectedOrigin = 'ETH_SEPOLIA'
+    const [loading, setLoading] = useState<boolean>(false);
+    const { smartAccountAddress, eoa, smartAccountClient, publicClient } = useSmartAccount();   
+    type ChainKey = keyof typeof chainsFrom; // Esto genera un tipo que es una unión de las claves de chainsFrom
+    const selectedOrigin: ChainKey = values.network as ChainKey //'ETH_SEPOLIA'
     const selectedDestination = 'ARB_SEPOLIA'
-    const selectedAmount = 10
-    const mintRecipient = '0xED1952aDf75A5052e85B0276cC90b0DFc6FBf71C'; // does not have to be an EOA
-
+    const selectedAmount =  ethers.parseUnits(values.amount.toString(), 6)
+    const mintRecipient = smartAccountAddress; // does not have to be an EOA
+    console.log( selectedOrigin,
+      selectedDestination,
+      selectedAmount,
+      mintRecipient)
     const onChangeHandlerNetwork = (value: string) => {
         setValues({
             ...values,
             network: value,
         });
     };
-
+    useEffect(() => {
+      connectWallet()
+    }, [])
     const onChangeHandlerAmount = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValues({
             ...values,
@@ -48,8 +115,9 @@ const Swapper: React.FC<ISwapper> = ({setValues, setOpen, values}) => {
         });
     };
 
-    const onSwap = () => {  
-        setOpen(false)
+    const onSwap = () => { 
+        setLoading(true)
+        bridge()
     }
 
     const connectWallet = async () => {
@@ -80,66 +148,14 @@ const Swapper: React.FC<ISwapper> = ({setValues, setOpen, values}) => {
     const bridge = async () => {
         if (!signer) {
             console.log("No signer available");
-            connectWallet()
+            // connectWallet()
             return
           }
 
         console.log("Starting cross-chain transfer...")
 
-        const chainsFrom = {
-          ETH_SEPOLIA: {
-            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
-            usdc: ''
-          },
-          OP_SEPOLIA: {
-            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
-            usdc: ''
-          },
-          ARB_SEPOLIA: {
-            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
-            usdc: ''
-          },
-          POLYGON_AMOY: {
-            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
-            usdc: ''
-          },
-          BASE_SEPOLIA: {
-            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
-            usdc: ''
-          },
-          AVAX_FUJI: {
-            token_messenger: '0xeb08f243e5d3fcff26a9e38ae5520a669f4019d0',
-            usdc: ''
-          }
-        }
 
-        const chainsTo = {
-          ETH_SEPOLIA: {
-            message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
-            domain: 0
-          },
-          OP_SEPOLIA: {
-            message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
-            domain: 2
-          },
-          ARB_SEPOLIA: {
-            message_transmitter: '0xaCF1ceeF35caAc005e15888dDb8A3515C41B4872',
-            domain: 3
-          },
-          POLYGON_AMOY: {
-            message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
-            domain: 7
-          },
-          BASE_SEPOLIA: {
-            message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
-            domain: 6
-          },
-          AVAX_FUJI: {
-            message_transmitter: '0xa9fb1b3009dcb79e2fe346c16a604b8fa8ae0a79',
-            domain: 1
-          }
-        }
-
+      
         const origin = chainsFrom[selectedOrigin]
         const destination = chainsTo[selectedDestination]
 
@@ -199,6 +215,9 @@ const Swapper: React.FC<ISwapper> = ({setValues, setOpen, values}) => {
         const receiveTxReceipt = await receiveTx.wait();
         console.log("Funds received on destination chain!");
         console.log(`See tx details: https://sepolia.arbiscan.io/tx/${receiveTxReceipt.transactionHash}`);
+        setLoading(false)
+        setOpen(false)
+
     }
 
     return (
@@ -211,7 +230,7 @@ const Swapper: React.FC<ISwapper> = ({setValues, setOpen, values}) => {
                     <SelectContent>
                         <SelectItem value="ETH_SEPOLIA">ETH_SEPOLIA</SelectItem>
                         <SelectItem value="OP_SEPOLIA">OP_SEPOLIA</SelectItem>
-                        <SelectItem value="ARB_SEPOLIA">ARB_SEPOLIA</SelectItem>
+                        {/* <SelectItem value="ARB_SEPOLIA">ARB_SEPOLIA</SelectItem> */}
                         <SelectItem value="POLYGON_AMOY">POLYGON_AMOY</SelectItem>
                         <SelectItem value="BASE_SEPOLIA">BASE_SEPOLIA</SelectItem>
                         <SelectItem value="AVAX_FUJI">AVAX_FUJI</SelectItem>
@@ -225,11 +244,13 @@ const Swapper: React.FC<ISwapper> = ({setValues, setOpen, values}) => {
                     className="border border-gray-300 rounded-lg px-4 py-2 w-full"
                 />
             </div>
-            <div className='mt-4'>
+            {!loading ? <div className='mt-4'>
                 <Button onClick = {onSwap}>
                     Deposit
                 </Button>
-            </div>
+            </div> : <div className='mt-4'>
+                Loading...
+            </div>}
         </>
     );
 };

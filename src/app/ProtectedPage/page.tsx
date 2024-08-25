@@ -37,7 +37,7 @@ const ProtectedPage = () => {
     if (!smartAccountAddress) return;
 
     if (usdcContract) {
-      getUsdcBalance(usdcContract, smartAccountAddress, setBalance);
+      getUsdcBalance(usdcContract, smartAccountAddress, setBalance, balance);
     }
 
     if (smartAccountClient && usdcContract) {

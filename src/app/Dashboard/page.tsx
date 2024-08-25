@@ -19,7 +19,7 @@ import investmentsPurple from '../../../public/investments-purple.svg';
 import spy from '../../../public/SPY.svg';
 import nasdaq from '../../../public/NASDAQ.svg';
 import eth from '../../../public/ETH.svg';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ModalAddWallet from "@/components/Dashboard/ModalAddWallet"
 import ModalAddWalletChild from "@/components/Dashboard/ModalAddWalletChild"
 import ModalConfirm from "@/components/Dashboard/ModalConfirm"
@@ -32,6 +32,11 @@ import ModalAddInvestmentChildCrypto from "@/components/Dashboard/ModalAddInvest
 import ModalAddInvestmentConfirm from "@/components/Dashboard/ModalAddInvestmentConfirm"
 import AuthenticationChecker from "@/components/AuthenticationChecker"
 import { usePrivy } from "@privy-io/react-auth"
+import { useSmartAccount } from "../hooks/SmartAccountContext"
+import { arbitrum, arbitrumSepolia, polygon } from "viem/chains"
+import { ethers } from "ethers"
+import { USDC_ADDRESSES } from "@/constants/addresses"
+import { getUsdcBalance } from "@/functions/usdc/balance"
 
 
 export interface ITab {
@@ -169,7 +174,39 @@ const Dashboard = () => {
         duration : 0
     })
     const [openInvestmentConfirm, setOpenInvestmentConfirm] = useState(false);
+    const { smartAccountAddress, eoa, smartAccountClient, publicClient } =
+    useSmartAccount();
 
+    const [balance, setBalance] = useState<any>(0);
+  const chain = polygon;
+
+  const usdcAbi = [
+    "function balanceOf(address owner) view returns (uint256)",
+    "function approve(address spender, uint256 amount) public returns (bool)",
+  ];
+  const provider = new ethers.JsonRpcProvider('https://polygon-mainnet.g.alchemy.com/v2/Fgy1wydMzkEVzqzkufxIT4IIoL15sKQU');
+  const usdcContract = new ethers.Contract(
+    USDC_ADDRESSES[chain.id],
+    usdcAbi,
+    provider,
+  );
+
+  const providerArbitrum = new ethers.JsonRpcProvider('https://arb-sepolia.g.alchemy.com/v2/Fgy1wydMzkEVzqzkufxIT4IIoL15sKQU');
+  const usdcContractArbitrum = new ethers.Contract(
+    USDC_ADDRESSES[arbitrumSepolia.id],
+    usdcAbi,
+    providerArbitrum,
+  );
+
+  useEffect(() => {
+    if (!smartAccountAddress) return;
+
+    if (usdcContract && usdcContractArbitrum) {
+      getUsdcBalance(usdcContract, smartAccountAddress, setBalance, balance);
+      getUsdcBalance(usdcContractArbitrum, smartAccountAddress, setBalance, balance);
+    }
+  }, [smartAccountAddress, smartAccountClient]);
+  
     return (
         <AuthenticationChecker>
         <div>
@@ -228,7 +265,7 @@ const Dashboard = () => {
             />
             <div className="p-4">
                 {tab === "Home" && <Home 
-                    balance={1000}
+                    balance={balance}
                 />}
                 {tab === "Savings" && <Savings
                     upperNavigation={child}

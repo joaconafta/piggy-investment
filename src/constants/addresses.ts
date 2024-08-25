@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { polygon, polygonAmoy } from "viem/chains";
+import { arbitrumSepolia, polygon, polygonAmoy } from "viem/chains";
 
 export const HUB_ADDRESSES: Record<number, Address> = {
   [polygon.id]: "0x059d306A25c4cE8D7437D25743a8B94520536BD5",
@@ -9,6 +9,7 @@ export const HUB_ADDRESSES: Record<number, Address> = {
 export const USDC_ADDRESSES: Record<number, Address> = {
   [polygon.id]: "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
   [polygonAmoy.id]: "0x6C615481E96806edBd9987B6E522A4Ea85d13659",
+  [arbitrumSepolia.id]: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
 };
 
 export const WBTC_ADDRESSES: Record<number, Address> = {
