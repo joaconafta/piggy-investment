@@ -61,6 +61,14 @@ The implementation involves interacting with Circle’s Token Messenger and Mess
 
 (CCTP with polygon amoy as destination does not work for us. The implementation is configured to transfers from multiple chains to arbitrum sepolia for proof of concept)
 
+### Rhinestone Module Implementation: Autoswap and Autoinvest
+
+In Piggy Investment, we use Rhinestone to implement two essential modules: Autoswap and Autoinvest. The Autoswap module automatically converts any ERC20 token deposited into the user’s Safe Smart Account into USDC. This ensures that all assets are consistently held in a stablecoin, providing a secure and predictable value. The module operates seamlessly on the Polygon Amoy network, converting tokens as soon as they are deposited. 
+- Module deployed in polygon amoy 0xDA990f56d1550f2624d37A216c1Ba4737A125b12
+
+The Autoinvest module leverages Uniswap to automatically generate yield on the USDC held in the Safe Smart Account. This module allows users to passively grow their investments, with all transactions securely managed within their account.
+- Module deployed in polygon amoy 0x259b166752c676D1e6A817dD405812B6bB3Be5F1
+
 ## Technologies Used
 
 ### UI
