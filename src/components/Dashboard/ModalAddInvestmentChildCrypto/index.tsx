@@ -46,7 +46,7 @@ const ModalAddInvestmentChildCrypto: React.FC<IModalAddWallet> = ({ setOpen, ope
                     <DialogHeader>
                         <DialogTitle className='text-center'>
                             <FredokaTitle className='font-bold text-lg'>
-                                Set up {childCreateAccount?.title}'s new investment
+                                Set up {childCreateAccount?.title}&apos;s new investment
                             </FredokaTitle>
                         </DialogTitle>
                         <DialogDescription className='space-y-4'>

@@ -1,5 +1,4 @@
 import {usePrivy, useWallets} from '@privy-io/react-auth';
-import LoginButton from '../LoginButton';
 import Login from '../Login';
 
 export default function AuthProvider() {

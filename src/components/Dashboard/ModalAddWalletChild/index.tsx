@@ -41,7 +41,7 @@ const ModalAddWalletChild: React.FC<IModalAddWallet> = ({ setOpenModalAddWalletC
                     <DialogHeader>
                         <DialogTitle className='text-center'>
                             <FredokaTitle className='font-bold text-lg'>
-                                Set up {childCreateAccount?.title}'s new savings account
+                                Set up {childCreateAccount?.title}&apos;s new savings account
                             </FredokaTitle>
                         </DialogTitle>
                         <DialogDescription className='space-y-4'>
