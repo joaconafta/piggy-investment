@@ -5,7 +5,7 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 
-const cn = (...classNames: (string | undefined)[]) => classNames.filter(Boolean).join(" ");
+export const cn = (...classNames: (string | undefined)[]) => classNames.filter(Boolean).join(" ");
  
 const Select = SelectPrimitive.Root
  

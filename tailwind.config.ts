@@ -20,7 +20,11 @@ const config: Config = {
         disabledGrayText: "#B3B3B3",
         neutral: {
           200 : "#E2E8F0",
-        }
+        },
+        "brand-fifty": "#F5F3FF",
+        success: "#BBF7D0",
+        successText: "#166534",
+
       },
     },
   },
