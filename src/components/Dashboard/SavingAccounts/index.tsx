@@ -50,10 +50,13 @@ interface ISavingAccounts {
 }
 
 const SavingAccounts: React.FC<ISavingAccounts> = ({ savings }) => {
+    const isInvestment = Array.isArray(savings) && savings.every(item => 'daysLeft' in item);
     return (
         <div className='space-y-2'>
-            <div className='font-bold text-lg mt-8'>Savings Accounts</div>
-            <div className='space-y-2'>
+            <div className='font-bold text-lg mt-8'>{
+                isInvestment ? 'Investment Accounts' : 'Saving Accounts'
+                }</div>
+            <div className='space-y-2 max-h-[350px] overflow-y-scroll'>
                 {savings.map((saving, index) => (
                     <SavingsCard
                         key={index}
@@ -66,6 +69,7 @@ const SavingAccounts: React.FC<ISavingAccounts> = ({ savings }) => {
                         autoSave={saving.autoSave}
                     />
                 ))}
+                <div className="h-20"/>
             </div>
         </div>
     )
