@@ -98,7 +98,7 @@ export const SmartAccountProvider = ({
   >();
   const [smartAccountReady, setSmartAccountReady] = useState(false);
 
-  const [publicClient, setPublicClient] = useState();
+  const [publicClient, setPublicClient] = useState<any>();
 
   useEffect(() => {
     if (!ready) return;
@@ -159,6 +159,7 @@ export const SmartAccountProvider = ({
       setSmartAccountClient(smartAccountClient);
       setSmartAccountAddress(smartAccountAddress);
       setSmartAccountReady(true);
+      setPublicClient(publicClient);
     };
 
     const embeddedWallet = wallets.find(

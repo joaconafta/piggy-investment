@@ -1,4 +1,4 @@
-import { Address } from "@balmy/sdk";
+import { Address } from "viem";
 import { USDC_ADDRESSES, WBTC_ADDRESSES, WMATIC_ADDRESSES } from "./addresses";
 import { polygon, polygonAmoy } from "viem/chains";
 

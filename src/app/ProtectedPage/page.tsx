@@ -14,7 +14,6 @@ import { getPositions } from "@/functions/dca/get_positions";
 import { BalmyProvider } from "@/providers/balmy.provider";
 import { terminatePosition } from "@/functions/dca/terminate_position";
 import { withdrawPosition } from "@/functions/dca/withdraw_position";
-import { Contract } from "ethers";
 import { getUsdcBalance } from "@/functions/usdc/balance";
 
 const ProtectedPage = () => {
@@ -43,11 +42,7 @@ const ProtectedPage = () => {
 
     if (smartAccountClient && usdcContract) {
       (async () => {
-        const balmy = new BalmyProvider(
-          smartAccountClient,
-          usdcContract,
-          publicClient,
-        );
+        const balmy = new BalmyProvider(smartAccountClient, publicClient);
         await usdcToWBTC(
           balmy,
           chain.id,
