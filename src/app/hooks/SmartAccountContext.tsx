@@ -6,6 +6,7 @@ import { createPublicClient, createWalletClient, custom, http } from "viem";
 import { polygon, polygonAmoy } from "viem/chains";
 import { Chain, Transport } from "viem";
 import {
+  SafeSmartAccount,
   signerToSafeSmartAccount,
   SmartAccount,
 } from "permissionless/accounts";
@@ -20,6 +21,7 @@ import {
   createPimlicoBundlerClient,
   createPimlicoPaymasterClient,
 } from "permissionless/clients/pimlico";
+import { Erc7579Actions, erc7579Actions } from "permissionless/actions/erc7579";
 
 export type SafeAccountClient =
   | SmartAccountClient<
@@ -149,17 +151,35 @@ export const SmartAccountProvider = ({
         bundlerTransport: http(transportUrl(chain)),
         middleware: {
           sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation,
-          gasPrice: async () =>
-            (await pimlicoBundler.getUserOperationGasPrice()).fast,
+          gasPrice: async () => (await pimlicoBundler.getUserOperationGasPrice()).fast,
         },
       });
+      // const txHash = await smartAccountClient.installModule({
+      //   type: "executor",
+      //   address: moduleAddress,
+      //   context: encodeAbiParameters(parseAbiParameters("address, address"), [
+      //     sepoliaUSDCTokenAddress,
+      //     poolSwapTestRouterAddress,
+      //   ]),
+      // });
+      // console.log("Autoswap USDC module is being installed: " + txHash);
+      // const txHash = await safeAccount.installModule({
+      //   type: "executor",
+      //   address: moduleAddress,
+      //   context: encodeAbiParameters(parseAbiParameters("address, address"), [
+      //     sepoliaUSDCTokenAddress,
+      //     poolSwapTestRouterAddress,
+      //   ]),
+      // });
+      // console.log("Autoinvest module is being installed: " + txHash);
 
       const smartAccountAddress = smartAccountClient.account?.address;
 
       setSmartAccountClient(smartAccountClient);
       setSmartAccountAddress(smartAccountAddress);
       setSmartAccountReady(true);
-      setPublicClient(publicClient);
+      setPublicClient(publicClient);    
+
     };
 
     const embeddedWallet = wallets.find(

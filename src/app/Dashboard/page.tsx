@@ -172,12 +172,11 @@ const Dashboard = () => {
         <div>
             <ModalAddWallet
                 setOpenModalAddWallet={setOpenModalAddWallet}
-                children={mockSavings}
                 setChildCreateAccount={setChildCreateAccount}
                 open={openModalAddWallet}
                 childCreateAccount={childCreateAccount}
                 setOpenModalAddWalletChildForm={setOpenModalAddWalletChildForm}
-            />
+            >{mockSavings}</ModalAddWallet>
             <ModalAddWalletChild
                 setOpenModalConfirm={setOpenModalConfirm}
                 setOpenModalAddWalletChildForm={setOpenModalAddWalletChildForm}
@@ -195,10 +194,9 @@ const Dashboard = () => {
                 childCreateAccount={childCreateAccount}
                 open={openModalAddInvestment}
                 setOpen={setOpenModalAddInvestment}
-                children={mockInvestments}
                 setChildCreateAccount={setChildCreateAccount}
                 setModalAddInvestmentChooseType={setOpenModalAddInvestmentChooseType}
-            />
+            >{mockInvestments}</ModalAddInvestment>
             <ModalAddInvestmentChooseType
                 open = {openModalAddInvestmentChooseType}
                 setOpen = {setOpenModalAddInvestmentChooseType}

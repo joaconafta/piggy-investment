@@ -24,61 +24,39 @@ const Swapper : React.FC = () => {
     const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
     const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
     const [account, setAccount] = useState<string | null>(null);
-  
+    const selectedOrigin = 'ETH_SEPOLIA'
+    const selectedDestination = 'ARB_SEPOLIA'
+    const selectedAmount = 10
+    const mintRecipient = '0xED1952aDf75A5052e85B0276cC90b0DFc6FBf71C'; // does not have to be an EOA
+
     const onChangeHandler = (value: string) => {
         console.log(value)
     }
 
-    // const connectWallet = async () => {
-    //     if (window.ethereum) {
-    //       try {
-    //         const web3Provider = new ethers.JsonRpcProvider('https://polygon-mainnet.g.alchemy.com/v2/Fgy1wydMzkEVzqzkufxIT4IIoL15sKQU');
-    //         setProvider(web3Provider);
-    
-    //         // Solicitar cuentas
-    //         const accounts = await web3Provider.send("eth_requestAccounts", []);
-    //         setAccount(accounts[0]);
-    
-    //         // Obtener el signer
-    //         const signer = await web3Provider.getSigner();
-    //         setSigner(signer);
-    
-    //         console.log('Connected account:', accounts[0]);
-    //       } catch (error) {
-    //         console.error("Error connecting to MetaMask", error);
-    //       }
-    //     } else {
-    //       alert('MetaMask not detected. Please install MetaMask.');
-    //     }
-    //   };
+    const connectWallet = async () => {
+        if (window.ethereum) {
+            try {
+                // Solicitar al usuario que conecte su cuenta a MetaMask
+                const browserProvider = new ethers.BrowserProvider(window.ethereum);
+                await browserProvider.send("eth_requestAccounts", []);
 
-    
-      const connectWallet = async () => {
-          if (window.ethereum) {
-              try {
-                  // Solicitar al usuario que conecte su cuenta a MetaMask
-                  const browserProvider = new ethers.BrowserProvider(window.ethereum);
-                  await browserProvider.send("eth_requestAccounts", []);
-  
-                  // Obtener el signer
-                  const signer = await browserProvider.getSigner();
-                  const address = await signer.getAddress();
-  
-                  // Actualizar el estado con el provider, signer y dirección de la cuenta
-                  setProvider(browserProvider);
-                  setSigner(signer);
-                  setAccount(address);
-  
-                  console.log("Connected with address:", address);
-              } catch (error) {
-                  console.error("Error connecting to MetaMask:", error);
-              }
-          } else {
-              console.error("MetaMask is not installed");
-          }
-      };
+                // Obtener el signer
+                const signer = await browserProvider.getSigner();
+                const address = await signer.getAddress();
 
+                // Actualizar el estado con el provider, signer y dirección de la cuenta
+                setProvider(browserProvider);
+                setSigner(signer);
+                setAccount(address);
 
+                console.log("Connected with address:", address);
+            } catch (error) {
+                console.error("Error connecting to MetaMask:", error);
+            }
+        } else {
+            console.error("MetaMask is not installed");
+        }
+    };
 
     const bridge = async () => {
         if (!signer) {
@@ -89,39 +67,81 @@ const Swapper : React.FC = () => {
 
         console.log("Starting cross-chain transfer...")
 
-         // Set up signers + providers
-        // const ethSepoliaProvider = new ethers.JsonRpcProvider(process.env.ETH_SEPOLIA_TESTNET_RPC);
-        // const arbSepoliaProvider = new ethers.JsonRpcProvider(process.env.ARB_SEPOLIA_TESTNET_RPC);
-        // const ethSepoliaWallet = new ethers.Wallet(process.env.ETH_SEPOLIA_PRIVATE_KEY, ethSepoliaProvider);
-        // const arbSepoliaWallet = new ethers.Wallet(process.env.ARB_SEPOLIA_PRIVATE_KEY, arbSepoliaProvider);
+        const chainsFrom = {
+          ETH_SEPOLIA: {
+            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+            usdc: ''
+          },
+          OP_SEPOLIA: {
+            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+            usdc: ''
+          },
+          ARB_SEPOLIA: {
+            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+            usdc: ''
+          },
+          POLYGON_AMOY: {
+            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+            usdc: ''
+          },
+          BASE_SEPOLIA: {
+            token_messenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
+            usdc: ''
+          },
+          AVAX_FUJI: {
+            token_messenger: '0xeb08f243e5d3fcff26a9e38ae5520a669f4019d0',
+            usdc: ''
+          }
+        }
 
-        // Testnet Contract Addresses
-        const ETH_SEPOLIA_TOKEN_MESSENGER_CONTRACT_ADDRESS = '0x9f3b8679c73c2fef8b59b4f3444d4e156fb70aa5';
-        const USDC_ETH_SEPOLIA_CONTRACT_ADDRESS = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238'
-        // const POLYGON_AMOY_MESSAGE_TRANSMITTER_CONTRACT_ADDRESS = '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD';
-        const ARB_SEPOLIA_MESSAGE_TRANSMITTER_CONTRACT_ADDRESS = '0xacf1ceef35caac005e15888ddb8a3515c41b4872';
+        const chainsTo = {
+          ETH_SEPOLIA: {
+            message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
+            domain: 0
+          },
+          OP_SEPOLIA: {
+            message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
+            domain: 2
+          },
+          ARB_SEPOLIA: {
+            message_transmitter: '0xaCF1ceeF35caAc005e15888dDb8A3515C41B4872',
+            domain: 3
+          },
+          POLYGON_AMOY: {
+            message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
+            domain: 7
+          },
+          BASE_SEPOLIA: {
+            message_transmitter: '0x7865fAfC2db2093669d92c0F33AeEF291086BEFD',
+            domain: 6
+          },
+          AVAX_FUJI: {
+            message_transmitter: '0xa9fb1b3009dcb79e2fe346c16a604b8fa8ae0a79',
+            domain: 1
+          }
+        }
+
+        const origin = chainsFrom[selectedOrigin]
+        const destination = chainsTo[selectedDestination]
 
         // initialize contracts using address and ABI
-        const usdcEthSepoliaContract = new ethers.Contract(USDC_ETH_SEPOLIA_CONTRACT_ADDRESS, usdcAbi, signer);
-        const ethSepoliaTokenMessengerContract = new ethers.Contract(ETH_SEPOLIA_TOKEN_MESSENGER_CONTRACT_ADDRESS, tokenMessengerAbi, signer)
-        const arbSepoliaMessageTransmitterContract = new ethers.Contract(ARB_SEPOLIA_MESSAGE_TRANSMITTER_CONTRACT_ADDRESS, messageTransmitterAbi, signer);
+        const usdcContract = new ethers.Contract(origin.usdc, usdcAbi, signer);
+        const tokenMessengerContract = new ethers.Contract(origin.token_messenger, tokenMessengerAbi, signer)
+        const messageTransmitterContract = new ethers.Contract(destination.message_transmitter, messageTransmitterAbi, signer);
         // Arbitrum Sepolia destination address
-        const mintRecipient = '0xED1952aDf75A5052e85B0276cC90b0DFc6FBf71C'; // does not have to be an EOA
         const destinationAddressInBytes32 = ethers.zeroPadValue(mintRecipient!, 32);
-        const ARB_SEPOLIA_DESTINATION_DOMAIN = 3; 
-        // const POLYGON_DESTINATION_DOMAIN = 7; // polygon domain
 
         // Amount that will be transferred
-        const amount = BigInt(10);
+        const amount = BigInt(selectedAmount);
 
         // STEP 1: Approve messenger contract to withdraw from our active eth address
         console.log("Approving USDC contract on source chain...")
-        const approveTx = await usdcEthSepoliaContract.approve(ETH_SEPOLIA_TOKEN_MESSENGER_CONTRACT_ADDRESS, amount);
+        const approveTx = await usdcContract.approve(origin.token_messenger, amount);
         await approveTx.wait();
 
         // STEP 2: Burn USDC
         console.log("Burning USDC on source chain...")
-        const burnTx = await ethSepoliaTokenMessengerContract.depositForBurn(amount, ARB_SEPOLIA_DESTINATION_DOMAIN, destinationAddressInBytes32, USDC_ETH_SEPOLIA_CONTRACT_ADDRESS);
+        const burnTx = await tokenMessengerContract.depositForBurn(amount, destination.domain, destinationAddressInBytes32, origin.usdc);
         const burnTxReceipt = await burnTx.wait();
 
         // STEP 3: Retrieve message bytes from logs
@@ -155,7 +175,7 @@ const Swapper : React.FC = () => {
 
         // STEP 5: Using the message bytes and signature receive the funds on destination chain and address
         console.log("Receiving funds on destination chain...")
-        const receiveTx = await arbSepoliaMessageTransmitterContract.receiveMessage(messageBytes[0], attestationSignature);
+        const receiveTx = await messageTransmitterContract.receiveMessage(messageBytes[0], attestationSignature);
         console.log(receiveTx)
         const receiveTxReceipt = await receiveTx.wait();
         console.log("Funds received on destination chain!");

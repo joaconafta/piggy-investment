@@ -43,18 +43,16 @@ const AddChildrenPage = () => {
                         key={index}
                         setStep={setStep}
                         setChildren={setChildren}
-                        children={children}
                         step={step}
                         index={index}
-                    />
+                    >{children}</Step2>
                 )
             ))}
             {step === (amountOfChildren + 2) &&
                 <Step3
-                    children={children}
                     setStep={setStep}
                     step={step}
-                />}
+                >{children}</Step3>}
             {step === (amountOfChildren + 3) && <Success/>}
             
         </div>
