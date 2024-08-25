@@ -64,10 +64,14 @@ const SavingsOverview: React.FC<ISavingsOverview> = ({ amount, title, childSavin
                     ))}
                 </div>
             </div>}
-
             {
-                isSaving && <div className='flex justify-center'>
+                isSaving  && <div className='flex justify-center'>
                     <Button onClick={setOpenModalNewSavingAccount}>Add new saving account</Button>
+                </div>
+            }
+            {
+                isInvestment && <div className='flex justify-center'>
+                    <Button onClick={setOpenModalNewSavingAccount}>Add new investment account</Button>
                 </div>
             }
         </div>

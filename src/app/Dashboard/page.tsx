@@ -1,7 +1,6 @@
 "use client"
 
 import HeadingDashboard from "@/components/Dashboard/Heading"
-import SavingsOverview from "@/components/Dashboard/SavingsOverview"
 import matt from '../../../public/matt.svg'
 import lucy from '../../../public/lucy.svg'
 import moneyBag from '../../../public/moneyBag.svg'
@@ -26,6 +25,11 @@ import ModalAddWalletChild from "@/components/Dashboard/ModalAddWalletChild"
 import ModalConfirm from "@/components/Dashboard/ModalConfirm"
 import Savings from "@/components/Dashboard/Savings"
 import Home from "@/components/Dashboard/Home"
+import Investments from "@/components/Dashboard/Investments"
+import ModalAddInvestment from "@/components/Dashboard/ModalAddInvestment"
+import ModalAddInvestmentChooseType from "@/components/Dashboard/ModalAddInvestmentChooseType"
+import ModalAddInvestmentChildCrypto from "@/components/Dashboard/ModalAddInvestmentChildCrypto"
+import ModalAddInvestmentConfirm from "@/components/Dashboard/ModalAddInvestmentConfirm"
 
 
 export interface ITab {
@@ -40,7 +44,14 @@ export interface IChildSavings {
     image: StaticImageData;
 }
 
+export interface IChildInvestments extends IChildSavings { }
+
 const mockChildSavings = [
+    { name: 'Matt', amount: 120, image: matt },
+    { name: 'Jane', amount: 120, image: lucy },
+];
+
+const mockChildInvestments = [
     { name: 'Matt', amount: 120, image: matt },
     { name: 'Jane', amount: 120, image: lucy },
 ];
@@ -64,56 +75,55 @@ const mockSavings: ISaving[] = [
         description: 'Lucy saving goal',
         autoSave: 20,
     },
-    // Add more savings objects as needed
 ];
 
-    export interface IInvestment extends ISaving {
-        daysLeft: number;
-    }
+export interface IInvestment extends ISaving {
+    daysLeft: number;
+    
+}
 
-    const mockInvestments: IInvestment[] = [
-        {
-            title: 'NASDAQ',
-            amount: 100,
-            imageChild: matt, // Replace with actual image paths
-            imageSavingGoal: nasdaq, // Replace with actual image paths
-            yieldOn: false,
-            description: 'Investment in NASDAQ',
-            autoSave: 10,
-            daysLeft: 4,
-        },
-        {
-            title: 'S&P 500',
-            amount: 50,
-            imageChild: lucy, // Replace with actual image paths
-            imageSavingGoal: spy, // Replace with actual image paths
-            yieldOn: false,
-            description: 'Investment in S&P 500',
-            autoSave: 20,
-            daysLeft: 7,
-        },
-        {
-            title: 'Ether',
-            amount: 20,
-            imageChild: matt, // Replace with actual image paths
-            imageSavingGoal: eth, // Replace with actual image paths
-            yieldOn: true,
-            description: 'Investment in Ether',
-            autoSave: 30,
-            daysLeft: 29,
-        },
-        {
-            title: 'Ether',
-            amount: 20,
-            imageChild: lucy, // Replace with actual image paths
-            imageSavingGoal: eth, // Replace with actual image paths
-            yieldOn: true,
-            description: 'Another Investment in Ether',
-            autoSave: 30,
-            daysLeft: 29,
-        },
-        // Add more investments objects as needed
-    ];
+const mockInvestments: IInvestment[] = [
+    {
+        title: 'Matt',
+        amount: 100,
+        imageChild: matt, 
+        imageSavingGoal: nasdaq, 
+        yieldOn: false,
+        description: 'Investment in NASDAQ',
+        autoSave: 10,
+        daysLeft: 4,
+    },
+    {
+        title: 'Lucy',
+        amount: 50,
+        imageChild: lucy,
+        imageSavingGoal: spy,
+        yieldOn: false,
+        description: 'Investment in S&P 500',
+        autoSave: 20,
+        daysLeft: 7,
+    },
+    {
+        title: 'Matt',
+        amount: 20,
+        imageChild: matt, 
+        imageSavingGoal: eth, 
+        yieldOn: true,
+        description: 'Investment in Ether',
+        autoSave: 30,
+        daysLeft: 29,
+    },
+    {
+        title: 'Lucy',
+        amount: 20,
+        imageChild: lucy,
+        imageSavingGoal: eth,
+        yieldOn: true,
+        description: 'Another Investment in Ether',
+        autoSave: 30,
+        daysLeft: 29,
+    },
+];
 
 
 const mockTabs: ITab[] = [
@@ -122,6 +132,15 @@ const mockTabs: ITab[] = [
     { name: 'Investments', icon: investments, iconPurple: investmentsPurple },
     { name: 'Settings', icon: settings, iconPurple: settingsPurple },
 ];
+
+
+
+export interface IInvestmentChild {
+    cryptoAsset: string;
+    autosavePercentage: string;
+    generateYield: boolean;
+    duration : number
+}
 
 
 const Dashboard = () => {
@@ -136,58 +155,93 @@ const Dashboard = () => {
         autosavePercentage: '',
         generateYield: false,
     });
-    
 
-    const filterInvestments = (child: string) => {
-        return mockInvestments.filter(investment => investment.title === child)
-    }
+    const [openModalAddInvestment, setOpenModalAddInvestment] = useState(false);
+    const [openModalAddInvestmentChooseType, setOpenModalAddInvestmentChooseType] = useState(false);
+    const [modalAddInvestmentChild, setModalAddInvestmentChild] = useState(false);
+    const [stockOrCrypto, setStockOrCrypto] = useState<String>('')
+    const [newInvestmentChild, setNewInvestmentChild] = useState({
+        cryptoAsset: '',
+        autosavePercentage: '',
+        generateYield: false,
+        duration : 0
+    })
+    const [openInvestmentConfirm, setOpenInvestmentConfirm] = useState(false);
 
     return (
         <div>
-            <ModalConfirm
-                open={openModalConfirm}
-                setOpen={setOpenModalConfirm}
-                childCreateAccount={childCreateAccount} 
-                newWalletChild={newWalletChild}
+            <ModalAddWallet
+                setOpenModalAddWallet={setOpenModalAddWallet}
+                children={mockSavings}
+                setChildCreateAccount={setChildCreateAccount}
+                open={openModalAddWallet}
+                childCreateAccount={childCreateAccount}
+                setOpenModalAddWalletChildForm={setOpenModalAddWalletChildForm}
             />
             <ModalAddWalletChild
                 setOpenModalConfirm={setOpenModalConfirm}
                 setOpenModalAddWalletChildForm={setOpenModalAddWalletChildForm}
                 setNewWalletChild={setNewWalletChild}
-                open = {openModalAddWalletChildForm}
+                open={openModalAddWalletChildForm}
                 childCreateAccount={childCreateAccount}
             />
-            <ModalAddWallet
-                setOpenModalAddWallet={setOpenModalAddWallet}
-                children={mockSavings}
+            <ModalConfirm
+                open={openModalConfirm}
+                setOpen={setOpenModalConfirm}
+                childCreateAccount={childCreateAccount}
+                newWalletChild={newWalletChild}
+            />
+            <ModalAddInvestment
+                childCreateAccount={childCreateAccount}
+                open={openModalAddInvestment}
+                setOpen={setOpenModalAddInvestment}
+                children={mockInvestments}
                 setChildCreateAccount={setChildCreateAccount}
-                open = {openModalAddWallet}
-                childCreateAccount={childCreateAccount}
-                setOpenModalAddWalletChildForm={setOpenModalAddWalletChildForm}
+                setModalAddInvestmentChooseType={setOpenModalAddInvestmentChooseType}
             />
+            <ModalAddInvestmentChooseType
+                open = {openModalAddInvestmentChooseType}
+                setOpen = {setOpenModalAddInvestmentChooseType}
+                setStockOrCrypto={setStockOrCrypto} 
+                setModalAddInvestmentChild={setModalAddInvestmentChild}
+                stockOrCrypto={stockOrCrypto}
+            />
+            {stockOrCrypto === 'Crypto' && 
+            <ModalAddInvestmentChildCrypto
+                open={modalAddInvestmentChild}
+                setOpen={setModalAddInvestmentChild}
+                childCreateAccount={childCreateAccount}
+                setNewInvestmentChild={setNewInvestmentChild}
+                setOpenInvestmentConfirm={setOpenInvestmentConfirm} 
+            />}
+            <ModalAddInvestmentConfirm
+                open={openInvestmentConfirm}
+                setOpen={setOpenInvestmentConfirm}
+                childCreateAccount={childCreateAccount}
+                newInvestmentChild={newInvestmentChild}
+            />
+            
             <HeadingDashboard
                 setTab={setTab}
                 setChild={setChild}
                 child={child}
             />
-           
             <div className="p-4">
-                {tab === "Home" && <Home/>}
+                {tab === "Home" && <Home 
+                    balance={1000}
+                />}
                 {tab === "Savings" && <Savings
                     upperNavigation={child}
                     setOpenModalAddWallet={setOpenModalAddWallet}
                     childSavings={mockChildSavings}
                     savingAccounts={mockSavings}
                 />}
-                {/* {tab === "Investments" && <SavingsOverview
-                    isInvestment = {true}
-                    amount={100}
-                    title='Investments overview'
-                    childSavings={mockChildSavings}
+                {tab === "Investments" && <Investments
+                    setOpenModalAddInvestment={setOpenModalAddInvestment}
+                    upperNavigation={child}
+                    investments={mockChildInvestments}
+                    investmentaccounts={mockInvestments}
                 />}
-                {tab === "Investments" && <SavingAccounts
-                    savings={filterInvestments(child)}
-                />} */}
                 <BottomNavigation
                     tabs={mockTabs}
                     setTab={setTab}
