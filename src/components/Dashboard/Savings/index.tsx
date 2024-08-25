@@ -17,7 +17,7 @@ const filterSavings = (child: string) => {
   return (
     <div>
       {upperNavigation === "See All" && <SavingsOverview
-        isHome={true}
+        isAll={true}
         amount={100}
         title='Savings Overview'
         childSavings={childSavings}

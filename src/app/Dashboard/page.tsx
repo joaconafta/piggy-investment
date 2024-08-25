@@ -46,12 +46,12 @@ export interface IChildSavings {
 
 export interface IChildInvestments extends IChildSavings { }
 
-const mockChildSavings = [
-    { name: 'Matt', amount: 120, image: matt },
-    { name: 'Jane', amount: 120, image: lucy },
+export const  mockChildSavings = [
+    { name: 'Matt', amount: 500, image: matt },
+    { name: 'Jane', amount: 500, image: lucy },
 ];
 
-const mockChildInvestments = [
+export const mockChildInvestments = [
     { name: 'Matt', amount: 120, image: matt },
     { name: 'Jane', amount: 120, image: lucy },
 ];
@@ -220,7 +220,6 @@ const Dashboard = () => {
                 childCreateAccount={childCreateAccount}
                 newInvestmentChild={newInvestmentChild}
             />
-            
             <HeadingDashboard
                 setTab={setTab}
                 setChild={setChild}

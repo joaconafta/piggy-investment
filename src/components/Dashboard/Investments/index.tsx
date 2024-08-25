@@ -20,7 +20,7 @@ const Investments : React.FC<IInvestments> = ({upperNavigation, investmentaccoun
   return (
     <div>
       {upperNavigation === "See All" && <InvestmentOverview
-        isHome={true}
+        isAll={true}
         amount={100}
         title='Investments Overview'
         childSavings={investments}
